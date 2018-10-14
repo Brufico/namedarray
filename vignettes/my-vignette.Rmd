@@ -1,0 +1,81 @@
+---
+title: "Using `namedarray`"
+subtitle: "A mini-utility package for setting up a storage system" 
+author: "Bruno Fischer Colonimos"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using namedarray}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  # collapse = TRUE,
+  comment = "#>"
+)
+```
+
+If you often end up writing code to store and retrieve options or parameters, this utility might be useful to you
+
+# Storage of options/parameters: an example
+
+**Example**: If we wish to output formatted text in either Latex or Html,
+We have to remember that formatting such as  emphasis, strong emphasis and centering (for example) are obtaned with different markup in these languages.
+
+Let us decide that we will define and store "prefix" and "suffix" strings for each of these formatting effects, and each language.
+
+## Setting up the system
+
+We set up the system with the function `setup_nametable`:
+```{r}
+library(namedarray)
+fstr <- setup_nametable(argnames = c("language", 
+                                     "effect", 
+                                     "position"),
+                        argranges = list(c("html", "latex"),
+                                         c("emphasis", 
+                                           "strong", 
+                                           "center"),
+                                         c("prefix", "suffix")))
+```
+
+This code assigns to `fstr` a named list of 2 functions (`set` and `get`), used respectively to store and to access the values, selecting them with a combination of the three named argument : `language` , `effect` , `position`.
+
+These arguments act as the `dimnames` of an array (and are ideed currently implemented as such) : a missing argument means that all possible values for this argument will be included in the selection.
+
+## Using the generated functions
+
+### Setting up values 
+
+```{r}
+# setting the empty string as the default string
+fstr$set( , value = "")  # no selector argument specified , ie all values are part or the selection
+
+# setting the prefix and suffix for the centering effect
+fstr$set(language = "html", effect = "center", position = "prefix", 
+         value = "<center> ")
+fstr$set(language = "html", effect = "center", position = "suffix", 
+         value = "</center> ")
+fstr$set(language = "latex", effect = "center", position = "prefix", 
+         value = "\\begin{centering}")
+fstr$set(language = "latex", effect = "center", position = "suffix", 
+         value = "\\end{centering}")
+
+# Similar code should be set up for the other effects
+
+```
+
+### Retrieving values
+
+```{r}
+# get one value
+fstr$get(language = "latex", effect = "center", position = "suffix")
+
+# get an array of values
+fstr$get(language = "latex") 
+```
+
+## Limitations
+With the current implementation, all the values should have the same type. 
