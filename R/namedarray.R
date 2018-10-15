@@ -55,10 +55,9 @@ argnames_to_formals <- function(argnames) {
 #' @export
 #' @examples
 #' # setup
-#' tst2 <- setup_nametable(argnames = c("bla", "ble", "bli"),
-#'                         argranges = list(c("a", "b"),
-#'                                          c("u", "v", "w"),
-#'                                          c("x", "y", "z", "t")))
+#' tst2 <- setup_nametable(argranges = list(bla = c("a", "b"),
+#'                                          ble = c("u", "v", "w"),
+#'                                          bli = c("x", "y", "z", "t")))
 #'
 #' # setting and retrieving value
 #' tst2$set( value = LETTERS[1:24])
@@ -69,11 +68,12 @@ argnames_to_formals <- function(argnames) {
 
 
 
-setup_nametable <- function(argnames,
-                            argranges) {
+setup_nametable <- function(argranges, initvals) { # here the argument is a named list of vectors of legal values
         # preparation: parameters
+        argnames <- names(argranges)
+        arglen <- length(argranges)
         dimensions <- sapply(argranges, length)
-        size <- Reduce(`*`, dimensions) # (if initilization)
+        size <- Reduce(`*`, dimensions) # (if initialization)
         # preparation: expressions
         namesyms <- rlang::syms(argnames)
         args <- argnames_to_formals(argnames)
@@ -96,6 +96,7 @@ setup_nametable <- function(argnames,
         eval(makearray_expr)
         eval(setfun_expr)
         eval(getfun_expr)
+        if (!missing(initvals)) {setfun(value = initvals)}
         return(list(set = setfun, get = getfun))
 }
 
